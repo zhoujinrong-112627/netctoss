@@ -1,0 +1,61 @@
+1 costlist
+           分页
+               上一页
+               下一页
+               页码遍历
+               高亮  页码遍历/类型高亮
+                            判断遍历的数据和当前数据的对比(从视图中获取)
+
+
+                    依赖2个对象
+                            paginator
+                                    应用场景 页码的遍历     page_range
+                                            获取page对象  page方法
+                            page
+                                    应用场景  上一页页码
+                                            下一页页码
+                                            是否有上一页
+                                            是否有下一页
+
+
+           删除
+                js
+                    window.confirm  弹出一个框   有确定和取消2个按钮  确定返回true 取消返回false
+                    在js中发送请求有2种：
+                                (1)window.location.href='/netctoss/costlist/'
+                                (2)window.open('/netctoss/costdelete/?id='+id,target='_self');
+                                注意window.open默认情况下是再次打开一个新的页面  所以需要指定一个参数
+                                target='_self'在当前窗口下 打开页面
+                     获取js对象有几种方式？dom对象
+                                document.getElementById()
+                                document.getElementsByTagName()
+                                document.getElementsByName()
+
+
+ day09
+
+ 1.删除bug  eg：有4条数据  一页有3条   然后在第二页的时候删除  会报错
+
+ 2.添加的时候点击取消  汇报错
+
+ 3.添加的前端和后端验证
+        前端验证  格式规范  不走数据库的判断
+        后端验证  用户名子是否被注册过  在数据库中判断
+
+ 4.排序
+                // text 和 html的区别？
+                {#// <div id='a'><div>a</div></div>#}
+                {#//a.text ==>a  innerText#}
+                {#//a.html ==><div>a</div>#  innerHTML}
+
+day10
+      排序bug
+
+      第一次进入到页面的时候  点击下一页是不需要排序的
+      那么如果点击了排序  那么下一页是需要排序的
+      排序的规则是第一次点击排序的规则一致
+
+
+
+
+

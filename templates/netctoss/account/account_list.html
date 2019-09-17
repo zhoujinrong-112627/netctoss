@@ -1,0 +1,234 @@
+﻿{% load static %}
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <title>NetCTOSS</title>
+        <link type="text/css" rel="stylesheet" media="all" href="{% static 'styles/global.css' %}" />
+        <link type="text/css" rel="stylesheet" media="all" href="{% static 'styles/global_color.css' %}" />
+        <script type="text/javascript" src="{% static 'js/jquery.js' %}"></script>
+
+        <script language="javascript" type="text/javascript">
+            $(function () {
+                $('.accountdelete').click(function () {
+                    var $input = $(this);
+
+                    var accountid = $input.parent('td').parent('tr').find('td').html();
+                    $.get('/account/accountdelete/',
+                         {'accountid':accountid},
+                         function (data) {
+                             if(data['status'] == 200){
+                                 var $td = $input.parent('td');
+                                 $td.html('');
+                                 $td.prev().prev().prev().html('删除');
+
+                             }
+                         })
+                })
+
+                $('.accountstart').click(function () {
+                    var $input = $(this);
+
+                    var accountid = $input.parent('td').parent('tr').find('td').html();
+
+                    $.get('/account/accountstart/',
+                        {'accountid':accountid},
+                        function (data) {
+                            if(data['status'] == 200){
+                                var $td = $input.parent('td');
+                                $td.html('<input type="button" value="暂停" class="btn_pause accountstart" />');
+                                 $td.prev().prev().prev().html('开通');
+                            }
+                        })
+                })
+
+                $('.accountpause').click(function () {
+                    //点击之后 要将当前对象的状态修改为1  并且要将状态栏的值修改为 暂停
+                    //操作里的内容修改为开通
+
+                    var $input = $(this);
+                    var accountid = $input.parent('td').parent('tr').find('td').html();
+                    $.post('/account/accountPause/',
+                        {'accountid':accountid},
+                        function (data) {
+                        //'10'  10   == true
+                            //'10'  10  === false
+                             if(data['status'] == 200){
+                                var $td = $input.parent('td');
+                                $td.html('<input type="button" value="开通" class="btn_start accountstart" />\n' +
+                                    '     <input type="button" value="修改" class="btn_modify" onclick="toUpdate({{ account.id }})" />\n' +
+                                    '     <input type="button" value="删除" class="btn_delete accountdelete" />');
+                                $td.prev().prev().prev().html('暂停');
+                             }
+                        }
+                    )
+
+                })
+            })
+
+            function toUpdate(id) {
+                window.location.href='/account/accountToUpdate/?id='+id
+
+            }
+
+
+
+
+
+            //删除
+            function deleteAccount(id) {
+                var r = window.confirm("确定要删除此账务账号吗？\r\n删除后将不能恢复，且会删除其下属的所有业务账号。");
+
+
+            }
+            //开通或暂停
+            function setState() {
+                var r = window.confirm("确定要开通此账务账号吗？");
+                document.getElementById("operate_result_info").style.display = "block";
+            }
+        </script>
+    </head>
+    <body>
+        <!--Logo区域开始-->
+        <div id="header">
+            <img src="{% static 'images/log.png' %}" alt="logo" class="left"/>
+            <a href="#">[退出]</a>            
+        </div>
+        <!--Logo区域结束-->
+        <!--导航区域开始-->
+        <div id="navi">                        
+            <ul id="menu">
+                <li><a href="../index.html" class="index_off"></a></li>
+                <li><a href="../role/role_list.html" class="role_off"></a></li>
+                <li><a href="../admin/admin_list.html" class="admin_off"></a></li>
+                <li><a href="{% url 'netctoss:costlist' %}" class="fee_off"></a></li>
+                <li><a href="{% url 'account:accountlist' %}" class="account_on"></a></li>
+                <li><a href="{% url 'service:servicelist' %}" class="service_off"></a></li>
+                <li><a href="../bill/bill_list.html" class="bill_off"></a></li>
+                <li><a href="../report/report_list.html" class="report_off"></a></li>
+                <li><a href="../user/user_info.html" class="information_off"></a></li>
+                <li><a href="../user/user_modi_pwd.html" class="password_off"></a></li>
+            </ul>            
+        </div>
+        <!--导航区域结束-->
+        <!--主要区域开始-->
+        <div id="main">
+            <form action="{% url 'account:accountlist' %}" method="post">
+                {% csrf_token %}
+                <!--查询-->
+                <div class="search_add">                        
+                    <div>身份证：<input type="text" name="idcard_no"  placeholder="不验证" class="text_search" /></div>
+                    <div>姓名：<input type="text" name="real_name" class="width70 text_search" placeholder="不验证" /></div>
+                    <div>登录名：<input type="text" name="login_name" placeholder="不验证" class="text_search" /></div>
+                    <div>
+                        状态：
+                        <select class="select_search" name="status">
+                            <option value="">全部</option>
+                            <option value="0">开通</option>
+                            <option value="1">暂停</option>
+                            <option value="2">删除</option>
+                        </select>
+                    </div>
+                    <div><input type="submit" value="搜索" class="btn_search" /></div>
+                    <input type="button" value="增加" class="btn_add" onclick="location.href='{% url 'account:accountToAdd' %}';" />
+                </div>  
+                <!--删除等的操作提示-->
+                <div id="operate_result_info" class="operate_success">
+                    <img src="../images/close.png" onclick="this.parentNode.style.display='none';" />
+                    删除成功，且已删除其下属的业务账号！
+                </div>   
+                <!--数据区域：用表格展示数据-->     
+                <div id="data">            
+                    <table id="datalist">
+                    <tr>
+                        <th>账号ID</th>
+                        <th>姓名</th>
+                        <th class="width150">身份证</th>
+                        <th>登录名</th>
+                        <th>状态</th>
+                        <th class="width100">创建日期</th>
+                        <th class="width150">上次登录时间</th>                                                        
+                        <th class="width200"></th>
+                    </tr>
+
+                    {% for account in p.object_list %}
+                        <tr>
+                            <td>{{ account.id }}</td>
+                            <td><a href="account_detail.html">{{ account.real_name }}</a></td>
+                            <td>{{ account.idcard_no }}</td>
+                            <td>{{ account.login_name }}</td>
+                            {% if account.status == '0' %}
+                                    <td>开通</td>
+                                {% elif account.status == '1' %}
+                                    <td>暂停</td>
+                                {% else %}
+                                    <td>删除</td>
+                            {% endif %}
+
+                            <td>{{ account.create_date }}</td>
+                            <td>{{ account.last_login_time }}</td>
+                            {% if account.status == '2' %}
+                                <td></td>
+                                {% elif account.status == '1' %}
+                                    <td class="td_modi">
+                                        <input type="button" value="开通" class="btn_start accountstart" />
+                                        <input type="button" value="修改" class="btn_modify" onclick="toUpdate({{ account.id }})" />
+                                        <input type="button" value="删除" class="btn_delete accountdelete" />
+                                    </td>
+                                {% else %}
+                                    <td class="td_modi">
+                                        <input type="button" value="暂停" class="btn_pause accountpause"/>
+                                    </td>
+
+                            {% endif %}
+
+                        </tr>
+                    {% endfor %}
+
+
+                </table>
+                <p>业务说明：<br />
+                1、创建则开通，记载创建时间；<br />
+                2、暂停后，记载暂停时间；<br />
+                3、重新开通后，删除暂停时间；<br />
+                4、删除后，记载删除时间，标示为删除，不能再开通、修改、删除；<br />
+                5、暂停账务账号，同时暂停下属的所有业务账号；<br />                
+                6、暂停后重新开通账务账号，并不同时开启下属的所有业务账号，需要在业务账号管理中单独开启；<br />
+                7、删除账务账号，同时删除下属的所有业务账号。</p>
+                </div>                   
+                <!--分页-->
+                <div id="pages">
+                    <a href="{% url 'account:accountlist' %}?page=1">首页</a>
+                    {% if p.has_previous %}
+                        <a href="{% url 'account:accountlist' %}?page={{ p.previous_page_number }}">上一页</a>
+                        {% else %}
+                        <a href="#">上一页</a>
+                    {% endif %}
+
+                    {% for p1 in pagin.page_range %}
+                        {% ifequal p1 pn %}
+                            <a href="{% url 'account:accountlist' %}?page={{ p1 }}" class="current_page">{{ p1 }}</a>
+                            {% else %}
+                            <a href="{% url 'account:accountlist' %}?page={{ p1 }}">{{ p1 }}</a>
+                        {% endifequal %}
+
+                    {% endfor %}
+
+
+
+                    {% if p.has_next %}
+                         <a href="{% url 'account:accountlist' %}?page={{ p.next_page_number }}&search_dict={{ search_dict }}">下一页</a>
+                        {% else %}
+                         <a href="#">下一页</a>
+                    {% endif %}
+
+                    <a href="{% url 'account:accountlist' %}?page={{ pagin.num_pages }}">末页</a>
+                </div>                    
+            </form>
+        </div>
+        <!--主要区域结束-->
+        <div id="footer">
+           
+        </div>
+    </body>
+</html>
